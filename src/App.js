@@ -1,25 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+import RootLayout from './pages/Root';
+import HomePage from './pages/Home';
+
+
+// const BlogPage = lazy(() => import('./pages/Blog'));
+const TransPortsPage = lazy(() => import('./pages/TransPorts'));
+const TransPortPage = lazy(() => import('./pages/TransPort'));
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: 'TransPorts',
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<p>Loading...</p>}>
+                <TransPortsPage />
+              </Suspense>
+            ),
+            loader: (meta) =>
+              import('./pages/TransPorts').then((module) => module.loader(meta)),
+          },
+          {
+            path: ':id',
+            element: (
+              <Suspense fallback={<p>Loading...</p>}>
+                <TransPortPage />
+              </Suspense>
+            ),
+            loader: (meta) =>
+              import('./pages/TransPort').then((module) => module.loader(meta)),
+          },
+        ],
+      },
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
